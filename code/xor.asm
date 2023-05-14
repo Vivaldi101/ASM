@@ -21,9 +21,10 @@ SSExor          proc
     mov rbx, r8
     mov rax, r8
     and rax, XORUnroll-1
-    shr rbx, 6                            ; how many iterations to SIMD
+    shr rbx, 6                            ; how many iterations to SIMD todo: derive from XORUnroll
     je lbl1
 
+  ; read one cacheline at a time
   align 16
   lbl0:
     movdqa xmm0, [rsi+rdx]                ; read the source
@@ -52,7 +53,7 @@ SSExor          proc
 
   align 4
   lbl1:
-    ; leftovers
+    ; Non mod 64 bytes
     movzx ecx, BYTE PTR [rdi+rdx]
     xor [rsi+rdx], cl
     add edx, 1
@@ -67,5 +68,60 @@ SSExor          proc
     ret
 
 SSExor endp
+
+public              SSEIsAllZero
+SSEIsAllZero        proc
+    push rbx
+    push rdi
+    push rsi
+
+    xor rdi, rdi
+    xor rsi, rsi
+
+    xor rax, rax
+    mov rbx, rdx
+    mov rsi, rdx
+    and rsi, XORUnroll-1
+    shr rbx, 6                            ; how many iterations to SIMD todo: derive from XORUnroll
+    je lbl1
+
+  ; read one cacheline at a time
+  align 16
+  lbl0:
+    movdqa xmm0, [rcx+rdi]                ; read the source
+    movdqa xmm1, [rcx+rdi+16]             ; read the source
+    movdqa xmm2, [rcx+rdi+32]             ; read the source
+    movdqa xmm3, [rcx+rdi+48]             ; read the source
+
+    orpd xmm0, xmm1
+    orpd xmm2, xmm3
+    orpd xmm0, xmm2
+    ptest xmm0, xmm0
+
+    jne lbl2
+
+    add rdi, XORUnroll
+    sub rbx, 1
+    jnz lbl0
+
+  align 4
+  lbl1:
+    ; Non mod 64 bytes
+    mov bl, byte ptr[rcx+rdi]
+    test bl, bl
+    jne lbl2
+    sub rsi, 1
+    jnz lbl1
+
+    mov rax, 1
+
+  lbl2:
+    ; exit
+    pop rsi
+    pop rdi
+    pop rbx
+    ret
+
+SSEIsAllZero        endp
 
 end

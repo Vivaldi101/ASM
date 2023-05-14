@@ -8,7 +8,9 @@ extern "C"
 {
     // Unused atm.
     void AsmMain(void);
+
     void SSExor(const char* src, const char* padd, unsigned int ln);
+    bool SSEIsAllZero(const char* src, unsigned int ln);
 };
 
 int main(int argc, char** argv)
@@ -33,13 +35,25 @@ int main(int argc, char** argv)
 
     fseek(fileInput, 0, SEEK_END);
     const unsigned int fileSize = ftell(fileInput);
+    if (fileSize == 0)
+    {
+        fprintf(stderr, "Bad file\n");
+        return -1;
+    }
     fseek(fileInput, 0, SEEK_SET);
 
     char* source = (char*)malloc(fileSize);
-    char* oldSource = (char*)malloc(fileSize);
     char* pad = (char*)malloc(fileSize);
 
-    if (!source || !oldSource || !pad)
+    // Random key pad for XOR
+    // TODO: Do this in asm
+
+    for (unsigned int i = 0; i < fileSize; ++i)
+    {
+        pad[i] = (i & 1) == 1 ? '1' : '0';
+    }
+
+    if (!source || !pad)
     {
         fprintf(stderr, "Bad malloc\n");
         return -1;
@@ -49,14 +63,7 @@ int main(int argc, char** argv)
 
     fclose(fileInput);
 
-    source[fileSize-1] = 0;
-
-    memcpy(pad, source, fileSize);
-    memcpy(oldSource, source, fileSize);
-
-    printf("XORing %s...\n", argv[1]);
-
-    SSExor(source, pad, fileSize);
+    //source[fileSize-1] = 0;
 
     printf("XORing %s...\n", argv[1]);
 
@@ -65,10 +72,9 @@ int main(int argc, char** argv)
     fwrite(source, 1, fileSize, fileOutput);
     fclose(fileOutput);
 
-    assert(memcmp(oldSource, source, fileSize) == 0);
+    assert(!SSEIsAllZero(source, fileSize));
 
     free(source);
-    free(oldSource);
     free(pad);
 
     printf("Success SSExor!\n");
