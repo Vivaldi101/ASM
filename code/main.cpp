@@ -6,60 +6,70 @@
 
 extern "C"
 {
+    // Unused atm.
     void AsmMain(void);
     void SSExor(const char* src, const char* padd, unsigned int ln);
 };
 
-int ReadLine(char* destination, int maxLineCount)
+int main(int argc, char** argv)
 {
-    assert(maxLineCount >= 2);
-
-    int result = 0;
-
-    char* readString = fgets(destination, maxLineCount, stdin);
-
-    if (readString)
+    if (argc != 3)
     {
-        size_t stringLen = strlen(readString);
-        if (stringLen > 0)
-        {
-            destination[stringLen - 1] = 0;
-        }
-
-        result = (int)stringLen;
-        assert(!readString[stringLen - 1]);
+        fprintf(stderr, "Invalid use\n");
+        fprintf(stdout, "Pass file to encrypt followed by name of the desired encrypted file\n");
+        return -1;
     }
 
-    return result;
-}
+    fprintf(stdout, "XORing file: %s to %s\n", argv[1], argv[2]);
 
-int main(void)
-{
-    // ASM code here.
+    FILE* fileInput = fopen(argv[1], "rb");
+    FILE* fileOutput = fopen(argv[2], "wb");
 
-#define SIZE ((64*4) + 10)
-
-    char source[SIZE];
-    char oldSource[SIZE];
-    char pad[SIZE];
-
-    for (int i = 0; i < SIZE; ++i)
+    if (!fileInput || !fileOutput)
     {
-        source[i] = 's';
-        oldSource[i] = source[i];
-
-        pad[i] = 's' + 3 - 10;
+        fprintf(stderr, "Error opening files\n");
+        return -1;
     }
 
-    printf("Encrypting...\n");
+    fseek(fileInput, 0, SEEK_END);
+    const unsigned int fileSize = ftell(fileInput);
+    fseek(fileInput, 0, SEEK_SET);
 
-    SSExor(source, pad, SIZE);
+    char* source = (char*)malloc(fileSize);
+    char* oldSource = (char*)malloc(fileSize);
+    char* pad = (char*)malloc(fileSize);
 
-    printf("Decrypting...\n");
+    if (!source || !oldSource || !pad)
+    {
+        fprintf(stderr, "Bad malloc\n");
+        return -1;
+    }
 
-    SSExor(source, pad, SIZE);
+    fread(source, 1, fileSize, fileInput);
 
-    assert(memcmp(oldSource, source, SIZE) == 0);
+    fclose(fileInput);
+
+    source[fileSize-1] = 0;
+
+    memcpy(pad, source, fileSize);
+    memcpy(oldSource, source, fileSize);
+
+    printf("XORing %s...\n", argv[1]);
+
+    SSExor(source, pad, fileSize);
+
+    printf("XORing %s...\n", argv[1]);
+
+    SSExor(source, pad, fileSize);
+
+    fwrite(source, 1, fileSize, fileOutput);
+    fclose(fileOutput);
+
+    assert(memcmp(oldSource, source, fileSize) == 0);
+
+    free(source);
+    free(oldSource);
+    free(pad);
 
     printf("Success SSExor!\n");
 

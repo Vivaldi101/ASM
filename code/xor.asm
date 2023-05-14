@@ -1,3 +1,4 @@
+; Cache line size - 64 / 16 = unroll loop by factor of 4 with 4-wide SIMD
 XORUnroll = 64
 
 .data
@@ -20,7 +21,7 @@ SSExor          proc
     mov rbx, r8
     mov rax, r8
     and rax, XORUnroll-1
-    shr rbx, 6                            ; int divide ln by XORUnroll
+    shr rbx, 6                            ; how many iterations to SIMD
     je lbl1
 
   align 16
@@ -51,6 +52,7 @@ SSExor          proc
 
   align 4
   lbl1:
+    ; leftovers
     movzx ecx, BYTE PTR [rdi+rdx]
     xor [rsi+rdx], cl
     add edx, 1
@@ -58,6 +60,7 @@ SSExor          proc
     jnz lbl1
 
   lbl2:
+    ; exit
     pop rdi
     pop rsi
     pop rbx
