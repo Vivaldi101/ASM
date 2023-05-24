@@ -1,5 +1,6 @@
 ; Cache line size - 64 / 16 = unroll loop by factor of 4 with 4-wide SIMD
 XORUnroll = 64
+XORIterations = 6
 
 .data
 
@@ -21,7 +22,7 @@ SSExor          proc
     mov rbx, r8
     mov rax, r8
     and rax, XORUnroll-1
-    shr rbx, 6                            ; how many iterations to SIMD todo: derive from XORUnroll
+    shr rbx, XORIterations
     je lbl1
 
   ; read one cacheline at a time
@@ -82,7 +83,7 @@ SSEIsAllZero        proc
     mov rbx, rdx
     mov rsi, rdx
     and rsi, XORUnroll-1
-    shr rbx, 6                            ; how many iterations to SIMD todo: derive from XORUnroll
+    shr rbx, XORIterations
     je lbl1
 
   ; read one cacheline at a time
