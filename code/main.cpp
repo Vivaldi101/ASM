@@ -9,12 +9,14 @@ extern "C"
     // Unused atm.
     void AsmMain(void);
 
-    void SSExor(const char* src, const char* padd, unsigned int ln);
+    void SSEPad(const char* src, unsigned int ln);
+    void SSEXor(const char* src, const char* padd, unsigned int ln);
     bool SSEIsAllZero(const char* src, unsigned int ln);
 };
 
 int main(int argc, char** argv)
 {
+
     if (argc != 3)
     {
         fprintf(stderr, "Invalid use\n");
@@ -67,7 +69,7 @@ int main(int argc, char** argv)
 
     printf("XORing %s...\n", argv[1]);
 
-    SSExor(source, pad, fileSize);
+    SSEXor(source, pad, fileSize);
 
     fwrite(source, 1, fileSize, fileOutput);
     fclose(fileOutput);

@@ -7,8 +7,8 @@ XORIterations = 6
 .code
 
 
-public          SSExor
-SSExor          proc
+public          SSEXor
+SSEXor          proc
 
     push rbx
     push rsi
@@ -49,8 +49,6 @@ SSExor          proc
 
     cmp r8, rdx
     je lbl2
-    sub r8, rdx
-    mov rax, r8
 
   align 4
   lbl1:
@@ -68,7 +66,7 @@ SSExor          proc
     pop rbx
     ret
 
-SSExor endp
+SSEXor endp
 
 public              SSEIsAllZero
 SSEIsAllZero        proc
@@ -78,8 +76,8 @@ SSEIsAllZero        proc
 
     xor rdi, rdi
     xor rsi, rsi
+    xor rax, rax                          ; all is not zero by default
 
-    xor rax, rax
     mov rbx, rdx
     mov rsi, rdx
     and rsi, XORUnroll-1
@@ -114,7 +112,7 @@ SSEIsAllZero        proc
     sub rsi, 1
     jnz lbl1
 
-    mov rax, 1
+    mov rax, 1                          ; all is zero
 
   lbl2:
     ; exit
