@@ -1,6 +1,8 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <malloc.h>
 #include <assert.h>
 
@@ -10,7 +12,7 @@ extern "C"
     void AsmMain(void);
 
     void SSEPad(const char* src, unsigned int ln);
-    void SSEXor(const char* src, const char* padd, unsigned int ln);
+    void SSEXor(const char* src, const char* pad, unsigned int ln);
     bool SSEIsAllZero(const char* src, unsigned int ln);
 };
 
@@ -44,21 +46,28 @@ int main(int argc, char** argv)
     }
     fseek(fileInput, 0, SEEK_SET);
 
-    char* source = (char*)malloc(fileSize);
-    char* pad = (char*)malloc(fileSize);
+    const size_t alignment = 64;
+    char* source = (char*)_aligned_malloc(fileSize, alignment);
+    char* pad = (char*)_aligned_malloc(fileSize, alignment);
 
     // Random key pad for XOR
     // TODO: Do this in asm
-
-    for (unsigned int i = 0; i < fileSize; ++i)
-    {
-        pad[i] = (i & 1) == 1 ? '1' : '0';
-    }
 
     if (!source || !pad)
     {
         fprintf(stderr, "Bad malloc\n");
         return -1;
+    }
+
+    assert((size_t)source % alignment == 0);
+    assert((size_t)pad % alignment == 0);
+
+    assert(((size_t)source & (alignment-1)) == 0);
+    assert(((size_t)pad & (alignment-1)) == 0);
+
+    for (unsigned int i = 0; i < fileSize; ++i)
+    {
+        pad[i] = (i & 1) == 1 ? '1' : '0';
     }
 
     fread(source, 1, fileSize, fileInput);
@@ -76,8 +85,8 @@ int main(int argc, char** argv)
 
     assert(!SSEIsAllZero(source, fileSize));
 
-    free(source);
-    free(pad);
+    _aligned_free(source);
+    _aligned_free(pad);
 
     printf("Success SSExor!\n");
 
