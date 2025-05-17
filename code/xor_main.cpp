@@ -32,7 +32,6 @@ extern "C"
 
 		fprintf(stderr, "Correct number of parameters given.\n");
 		fprintf(stderr, "XORing file: %s to %s\n", argv[1], argv[2]);
-		fprintf(stderr, "XORing file: %s to %s\n", argv[1], argv[2]);
 		fflush(stderr);
 
 		FILE* fileInput = fopen(argv[1], "rb");
