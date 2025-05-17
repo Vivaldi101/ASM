@@ -14,48 +14,56 @@ SSEXor          proc
     push rsi
     push rdi
 
-    mov rsi, rcx    ; source
-    mov rdi, rdx    ; pad
-
+    mov rsi, rcx
+    mov rdi, rdx
     xor rdx, rdx
     test r8, r8
-    je lbl2                 ; exit if zero length
+    je lbl2
     mov rbx, r8
     mov rax, r8
-    and rax, XORUnroll-1    ; left-overs
-    shr rbx, XORIterations  ; how many 64 wide iterations to do
+    and rax, XORUnroll-1
+    shr rbx, XORIterations
     je lbl1
 
   ; read one cacheline at a time
+  align 16
   lbl0:
-    vmovaps zmm0, [rsi+rdx]         ; read the source
+    movdqa xmm0, [rsi+rdx]                ; read the source
+    movdqa xmm1, [rsi+rdx+16]             ; read the source
+    movdqa xmm2, [rsi+rdx+32]             ; read the source
+    movdqa xmm3, [rsi+rdx+48]             ; read the source
 
-    vxorps zmm0, zmm0, [rdi+rdx]    ; xor pad to source
+    pxor xmm0, [rdi+rdx]                  ; xor pad to source
+    pxor xmm1, [rdi+rdx+16]               ; xor pad to source
+    pxor xmm2, [rdi+rdx+32]               ; xor pad to source
+    pxor xmm3, [rdi+rdx+48]               ; xor pad to source
 
-    vmovaps [rsi+rdx], zmm0         ; write result back to source
+    movntdq [rsi+rdx],    xmm0            ; write result back to source
+    movntdq [rsi+rdx+16], xmm1            ; write result back to source
+    movntdq [rsi+rdx+32], xmm2            ; write result back to source
+    movntdq [rsi+rdx+48], xmm3            ; write result back to source
 
     add rdx, XORUnroll
     sub rbx, 1
-    jne lbl0                        ; all 64 wide iterations done
+    jnz lbl0
 
-    cmp r8, rdx                     ; left-overs
+    cmp r8, rdx
     je lbl2
 
+  align 4
   lbl1:
-    ; non mod 64 bytes
-    mov cl, BYTE PTR [rdi+rdx]
+    ; Non mod 64 bytes
+    movzx ecx, BYTE PTR [rdi+rdx]
     xor [rsi+rdx], cl
-    add rdx, 1
+    add edx, 1
     sub rax, 1
-    jne lbl1
+    jnz lbl1
 
   lbl2:
     ; exit
-
     pop rdi
     pop rsi
     pop rbx
-
     ret
 
 SSEXor endp
@@ -93,7 +101,7 @@ SSEIsAllZero        proc
 
     add rdi, XORUnroll
     sub rbx, 1
-    jne lbl0
+    jnz lbl0
 
   align 4
   lbl1:
@@ -102,7 +110,7 @@ SSEIsAllZero        proc
     test bl, bl
     jne lbl2
     sub rsi, 1
-    jne lbl1
+    jnz lbl1
 
     mov rax, 1                          ; all is zero
 
