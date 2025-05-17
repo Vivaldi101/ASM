@@ -1,6 +1,6 @@
 @echo off
 
-CALL "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+CALL "C:\Program Files\Microsoft Visual Studio\2022\Preview\VC\Auxiliary\Build\vcvars64.bat"
 
 IF NOT EXIST ..\build mkdir ..\build
 pushd ..\build
