@@ -1,4 +1,1 @@
-build/*
-!build/*.lib
-!build/*.dll
 data/
