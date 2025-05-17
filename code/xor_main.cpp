@@ -19,15 +19,21 @@ extern "C"
 
 	EXPORT int XorMain(int argc, char** argv)
 	{
+		fprintf(stderr, "Beginning Xor program.\n");
+		fflush(stderr);
 
 		if (argc != 3)
 		{
 			fprintf(stderr, "Invalid use\n");
 			fprintf(stderr, "Pass file to encrypt followed by name of the desired encrypted file\n");
+			fflush(stderr);
 			return -1;
 		}
 
+		fprintf(stderr, "Correct number of parameters given.\n");
 		fprintf(stderr, "XORing file: %s to %s\n", argv[1], argv[2]);
+		fprintf(stderr, "XORing file: %s to %s\n", argv[1], argv[2]);
+		fflush(stderr);
 
 		FILE* fileInput = fopen(argv[1], "rb");
 		FILE* fileOutput = fopen(argv[2], "wb");
