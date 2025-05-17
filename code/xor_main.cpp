@@ -23,11 +23,11 @@ extern "C"
 		if (argc != 3)
 		{
 			fprintf(stderr, "Invalid use\n");
-			fprintf(stdout, "Pass file to encrypt followed by name of the desired encrypted file\n");
+			fprintf(stderr, "Pass file to encrypt followed by name of the desired encrypted file\n");
 			return -1;
 		}
 
-		fprintf(stdout, "XORing file: %s to %s\n", argv[1], argv[2]);
+		fprintf(stderr, "XORing file: %s to %s\n", argv[1], argv[2]);
 
 		FILE* fileInput = fopen(argv[1], "rb");
 		FILE* fileOutput = fopen(argv[2], "wb");
