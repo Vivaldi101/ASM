@@ -7,6 +7,9 @@
 #define EXPORT __attribute__((visibility("default")))
 #endif
 
-EXPORT int XorMain(int argc, char** argv);
+extern "C"
+{
+	EXPORT int XorMain(int argc, char** argv);
+}
 
 #endif
