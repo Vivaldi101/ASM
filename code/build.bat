@@ -1,7 +1,5 @@
 @echo off
 
-CALL "C:\Program Files\Microsoft Visual Studio\2022\Preview\VC\Auxiliary\Build\vcvars64.bat"
-
 IF NOT EXIST ..\build mkdir ..\build
 pushd ..\build
 del /Q/F/S *.* > nul
