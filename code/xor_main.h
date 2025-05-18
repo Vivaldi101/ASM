@@ -9,7 +9,7 @@
 
 extern "C"
 {
-	EXPORT int XorMain(int argc, const char* from, const char* to);
+	EXPORT int XorMain(const char* from, const char* to);
 }
 
 #endif

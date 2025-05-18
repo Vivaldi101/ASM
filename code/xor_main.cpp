@@ -5,11 +5,49 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <assert.h>
+#include <intrin.h>
 
 #include "xor_main.h"
 
 extern "C"
 {
+	static void PrintError()
+	{
+		fprintf(stderr, "Invalid use\n");
+		fprintf(stderr, "Pass file to encrypt followed by name of the desired encrypted file or -simd to print supported simd versions\n");
+	}
+
+	static void PrintSIMDSupport()
+	{
+		int cpuInfo[4];
+
+		// CPUID function 1: basic SIMD features (SSE, AVX)
+		__cpuid(cpuInfo, 1);
+
+		if (cpuInfo[3] & (1 << 25))
+			printf("SSE supported\n");
+		if (cpuInfo[3] & (1 << 26))
+			printf("SSE2 supported\n");
+		if (cpuInfo[2] & (1 << 0))
+			printf("SSE3 supported\n");
+		if (cpuInfo[2] & (1 << 9))
+			printf("SSSE3 supported\n");
+		if (cpuInfo[2] & (1 << 19))
+			printf("SSE4.1 supported\n");
+		if (cpuInfo[2] & (1 << 20))
+			printf("SSE4.2 supported\n");
+		if (cpuInfo[2] & (1 << 28))
+			printf("AVX supported\n");
+
+		// CPUID function 7, subfunction 0: newer SIMD like AVX2, AVX-512
+		__cpuidex(cpuInfo, 7, 0);
+
+		if (cpuInfo[1] & (1 << 5))
+			printf("AVX2 supported\n");
+		if (cpuInfo[1] & (1 << 16))
+			printf("AVX-512F supported\n");
+	}
+
 	// Unused atm.
 	void AsmMain(void);
 
@@ -17,26 +55,23 @@ extern "C"
 	void SSEXor(const char* src, const char* pad, unsigned int ln);
 	bool SSEIsAllZero(const char* src, unsigned int ln);
 
-	EXPORT int XorMain(int argc, const char* from, const char* to)
+	EXPORT int XorMain(const char* from, const char* to)
 	{
-		fprintf(stderr, "Beginning Xor program.\n");
-
-		if (argc != 3)
+		if(strcmp(from, "-simd") == 0)
 		{
-			fprintf(stderr, "Invalid use\n");
-			fprintf(stderr, "Pass file to encrypt followed by name of the desired encrypted file\n");
-			return -1;
+			PrintSIMDSupport();
+			return 0;
 		}
 
 		fprintf(stderr, "Correct number of parameters given.\n");
-		fprintf(stderr, "XORing file: %s to %s\n", from, to);
+		fprintf(stderr, "Trying to xor file: %s to %s\n", from, to);
 
 		FILE* fileInput = fopen(from, "rb");
 		FILE* fileOutput = fopen(to, "wb");
 
 		if (!fileInput || !fileOutput)
 		{
-			fprintf(stderr, "Error opening files\n");
+			fprintf(stderr, "Error opening files - do they exist?\n");
 			return -1;
 		}
 
@@ -79,7 +114,7 @@ extern "C"
 
 		//source[fileSize-1] = 0;
 
-		printf("XORing %s...\n", from);
+		//printf("xoring %s...\n", from);
 
 		SSEXor(source, pad, fileSize);
 
@@ -91,7 +126,7 @@ extern "C"
 		_aligned_free(source);
 		_aligned_free(pad);
 
-		printf("Success SSExor!\n");
+		printf("Success xoring!\n");
 
 		return 0;
 	}
