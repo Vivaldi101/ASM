@@ -17,25 +17,22 @@ extern "C"
 	void SSEXor(const char* src, const char* pad, unsigned int ln);
 	bool SSEIsAllZero(const char* src, unsigned int ln);
 
-	EXPORT int XorMain(int argc, char** argv)
+	EXPORT int XorMain(int argc, const char* from, const char* to)
 	{
 		fprintf(stderr, "Beginning Xor program.\n");
-		fflush(stderr);
 
 		if (argc != 3)
 		{
 			fprintf(stderr, "Invalid use\n");
 			fprintf(stderr, "Pass file to encrypt followed by name of the desired encrypted file\n");
-			fflush(stderr);
 			return -1;
 		}
 
 		fprintf(stderr, "Correct number of parameters given.\n");
-		fprintf(stderr, "XORing file: %s to %s\n", argv[1], argv[2]);
-		fflush(stderr);
+		fprintf(stderr, "XORing file: %s to %s\n", from, to);
 
-		FILE* fileInput = fopen(argv[1], "rb");
-		FILE* fileOutput = fopen(argv[2], "wb");
+		FILE* fileInput = fopen(from, "rb");
+		FILE* fileOutput = fopen(to, "wb");
 
 		if (!fileInput || !fileOutput)
 		{
@@ -82,7 +79,7 @@ extern "C"
 
 		//source[fileSize-1] = 0;
 
-		printf("XORing %s...\n", argv[1]);
+		printf("XORing %s...\n", from);
 
 		SSEXor(source, pad, fileSize);
 
