@@ -10,6 +10,7 @@
 extern "C"
 {
 	EXPORT int XorMain(const char* from, const char* to);
+	EXPORT void PrintSIMDSupport();
 }
 
 #endif

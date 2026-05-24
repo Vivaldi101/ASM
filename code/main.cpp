@@ -13,21 +13,12 @@ void PrintError()
 
 int main(int argc, char** argv)
 {
-	if(argc == 2)
-	{
-		if(strcmp(argv[1], "-simd") == 0)
-			return XorMain(argv[1], argv[2]);
-		else
-		{
-			PrintError();
-			return -1;
-		}
-	}
-	if (argc != 3)
-	{
-		PrintError();
-		return -1;
-	}
+   if(argc == 3)  // program name and files to encrypt/decrypt
+      XorMain(argv[1], argv[2]);
+   else if(argc == 2 && strcmp(argv[1], "-simd") == 0)
+      PrintSIMDSupport();
+   else
+      PrintError();
 
-	return XorMain(argv[1], argv[2]);
+   return 0;
 }

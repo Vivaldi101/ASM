@@ -17,7 +17,7 @@ extern "C"
 		fprintf(stderr, "Pass file to encrypt followed by name of the desired encrypted file or -simd to print supported simd versions\n");
 	}
 
-	static void PrintSIMDSupport()
+   EXPORT void PrintSIMDSupport()
 	{
 		int cpuInfo[4];
 
